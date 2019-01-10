@@ -3,7 +3,7 @@ package entities
 import "errors"
 
 type entity struct {
-	id string
+	Id string
 }
 
 type Entity interface {
@@ -18,12 +18,12 @@ func NewEntity(id string) Entity {
 }
 
 func (e *entity) GetId() string {
-	return e.id
+	return e.Id
 }
 
 func (e *entity) SetId(id string) error {
-	if e.id == "" {
-		e.id = id
+	if e.Id == "" {
+		e.Id = id
 		return nil
 	}
 

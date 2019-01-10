@@ -1,31 +1,20 @@
 package marketplace
 
 import (
-	stg "github.com/grevych/cabify/internal/storage"
+	"github.com/grevych/cabify/internal/storage/memory"
 	"github.com/grevych/cabify/pkg/entities"
 )
 
 type Marketplace struct {
-	storage stg.Storage
+	storage *memory.Storage
 }
 
-func NewMarketplace(storage stg.Storage) *Marketplace {
-	return &Marketpace{storage}
+func NewMarketplace(storage *memory.Storage) *Marketplace {
+	return &Marketplace{storage}
 }
 
-func (m *Marketplace) ListProducts() ([]*entities.Products, error) {
-	products := []*entities.Products{}
-	basketStore := m.storage.GetBasketStore()
+func (m *Marketplace) ListProducts() ([]*entities.Product, error) {
+	productStore := m.storage.GetProductStore()
 
-	for _, entity := range basketStore.Items {
-		product, err := entity.(Product)
-
-		if err != nil {
-			return nil, err
-		}
-
-		products = append(products, &product)
-	}
-
-	return products, nil
+	return productStore.All(), nil
 }

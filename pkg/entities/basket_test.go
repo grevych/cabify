@@ -135,14 +135,14 @@ func TestRemoveProductProduct(t *testing.T) {
 	}{
 		"TestRemoveProduct": {
 			basket:         createBasket(basketId, product),
-			productId:      product.id,
+			productId:      product.GetId(),
 			expectedBasket: createBasket(basketId),
 			expectedError:  nil,
 		},
 
 		"TestRemoveNonExistentProduct": {
 			basket:         createBasket(basketId),
-			productId:      product.id,
+			productId:      product.GetId(),
 			expectedBasket: createBasket(basketId),
 			expectedError: errors.New(
 				"Product product-id does not exist in basket basket-id",

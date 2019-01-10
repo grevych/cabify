@@ -14,18 +14,18 @@ func NewProductStore() *ProductStore {
 	return &ProductStore{
 		store: NewStore(),
 	}
+}
 
-	// Add Voucher
-	// voucher, _ := entities.NewProduct("", "VOUCHER", "Cabify Voucher", 400)
-	// ps.store.Save(voucher)
+func (ps *ProductStore) All() []*entities.Product {
+	products := []*entities.Product{}
 
-	// Add Mug
-	// mug, _ := entities.NewProduct("", "MUG", "Cabify Mug", 500)
-	// ps.store.Save(mug)
+	for _, entity := range ps.store.All() {
+		if product, ok := entity.(*entities.Product); ok {
+			products = append(products, product)
+		}
+	}
 
-	// Add Shirt
-	// shirt, _ := entities.NewProduct("", "SHIRT", "Cabify Shirt", 600)
-	// ps.store.Save(shirt)
+	return products
 }
 
 func (ps *ProductStore) FindById(productId string) (*entities.Product, error) {

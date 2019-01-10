@@ -35,15 +35,19 @@ func (b *Basket) AddProduct(product *Product) error {
 
 func (b *Basket) RemoveProduct(productId string) error {
 	products := []*Product{}
+	productNotFound := true
 
 	for _, product := range b.Products {
-		if product.id != productId {
-			products = append(products, product)
+		if product.GetId() == productId && productNotFound {
+			productNotFound = false
+			continue
 		}
+
+		products = append(products, product)
 	}
 
 	if len(products) == len(b.Products) {
-		return fmt.Errorf("Product %s does not exist in basket %s", productId, b.id)
+		return fmt.Errorf("Product %s does not exist in basket %s", productId, b.GetId())
 	}
 
 	b.Products = products

@@ -17,6 +17,16 @@ func NewStore() *store {
 	}
 }
 
+func (s *store) All() []entities.Entity {
+	items := []entities.Entity{}
+
+	for _, item := range s.items {
+		items = append(items, item)
+	}
+
+	return items
+}
+
 func (s *store) FindById(itemId string) (entities.Entity, error) {
 	item, ok := s.items[itemId]
 	if !ok {
