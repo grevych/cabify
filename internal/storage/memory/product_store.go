@@ -11,37 +11,35 @@ type ProductStore struct {
 }
 
 func NewProductStore() *ProductStore {
-	ps := &ProductStore{
+	return &ProductStore{
 		store: NewStore(),
 	}
 
 	// Add Voucher
-	voucher, _ := entities.NewProduct("", "VOUCHER", "Cabify Voucher", 400)
-	ps.Save(voucher)
+	// voucher, _ := entities.NewProduct("", "VOUCHER", "Cabify Voucher", 400)
+	// ps.store.Save(voucher)
 
 	// Add Mug
-	mug, _ := entities.NewProduct("", "MUG", "Cabify Mug", 500)
-	ps.Save(mug)
+	// mug, _ := entities.NewProduct("", "MUG", "Cabify Mug", 500)
+	// ps.store.Save(mug)
 
 	// Add Shirt
-	shirt, _ := entities.NewProduct("", "SHIRT", "Cabify Shirt", 600)
-	ps.Save(shirt)
-
-	return ps
+	// shirt, _ := entities.NewProduct("", "SHIRT", "Cabify Shirt", 600)
+	// ps.store.Save(shirt)
 }
 
 func (ps *ProductStore) FindById(productId string) (*entities.Product, error) {
-	obj, err := ps.store.FindEntityById(productId)
+	entity, err := ps.store.FindById(productId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	product, ok := obj.(entities.Product)
+	product, ok := entity.(*entities.Product)
 
 	if !ok {
-		return nil, fmt.Errorf("Unable to assert type Product for id %s", productId)
+		return nil, fmt.Errorf("Invalid entity type for Product %s", productId)
 	}
 
-	return &product, nil
+	return product, nil
 }

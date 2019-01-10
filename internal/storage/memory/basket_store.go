@@ -17,17 +17,17 @@ func NewBasketStore() *BasketStore {
 }
 
 func (bs *BasketStore) FindById(basketId string) (*entities.Basket, error) {
-	obj, err := bs.store.FindEntityById(basketId)
+	entity, err := bs.store.FindById(basketId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	basket, ok := obj.(entities.Basket)
+	basket, ok := entity.(*entities.Basket)
 
 	if !ok {
-		return nil, fmt.Errorf("Unable to assert type Basket for id %s", basketId)
+		return nil, fmt.Errorf("Invalid entity type for Basket %s", basketId)
 	}
 
-	return &basket, nil
+	return basket, nil
 }

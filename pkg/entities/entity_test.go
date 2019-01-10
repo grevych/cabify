@@ -2,53 +2,93 @@ package entities
 
 import (
 	"errors"
-	"testing"
 	"reflect"
+	"testing"
 )
 
+func TestNewEntity(t *testing.T) {
+	entityId := "entity-id"
 
-func TestGetId(t *testing.T) {
-	tests := map[string]struct{
-		entity *entity
-		expectedId string
+	tests := map[string]struct {
+		entityId       string
+		expectedEntity *entity
 	}{
-		"TestGetId": {
-			entity: &entity{"entity-id"},
-			expectedId: "entity-id",
+		"TestNewEntity": {
+			entityId:       entityId,
+			expectedEntity: &entity{entityId},
 		},
 
-		"TestGetEmptyId": {
-			entity: &entity{},
-			expectedId: "",
+		"TestNewEntityWithEmptyId": {
+			entityId:       "",
+			expectedEntity: &entity{},
 		},
 	}
 
 	for testName, testCase := range tests {
 		t.Run(testName, func(t *testing.T) {
-			id := testCase.entity.GetId()
+			entity := NewEntity(testCase.entityId)
 
-			if !reflect.DeepEqual(testCase.expectedId, id) {
-				t.Errorf("Expected id %+v, got %+v", testCase.expectedId, id)
+			if !reflect.DeepEqual(testCase.expectedEntity, entity) {
+				t.Errorf(
+					"Expected entity %+v, got %+v",
+					testCase.expectedEntity,
+					entity,
+				)
+			}
+		})
+	}
+}
+
+func TestGetId(t *testing.T) {
+	entityId := "entity-id"
+
+	tests := map[string]struct {
+		entity           *entity
+		expectedEntityId string
+	}{
+		"TestGetId": {
+			entity:           &entity{entityId},
+			expectedEntityId: entityId,
+		},
+
+		"TestGetEmptyId": {
+			entity:           &entity{},
+			expectedEntityId: "",
+		},
+	}
+
+	for testName, testCase := range tests {
+		t.Run(testName, func(t *testing.T) {
+			entityId := testCase.entity.GetId()
+
+			if !reflect.DeepEqual(testCase.expectedEntityId, entityId) {
+				t.Errorf(
+					"Expected entity id %+v, got %+v",
+					testCase.expectedEntityId,
+					entityId,
+				)
 			}
 		})
 	}
 }
 
 func TestSetId(t *testing.T) {
-	tests := map[string]struct{
-		entity *entity
-		entityId string
+	entityId := "entity-id"
+
+	tests := map[string]struct {
+		entity        *entity
+		entityId      string
 		expectedError error
 	}{
 		"TestSetId": {
-			entity: &entity{""},
-			entityId: "entity-id",
+			entity:        &entity{""},
+			entityId:      entityId,
 			expectedError: nil,
 		},
 
 		"TestSetIdTwice": {
-			entity: &entity{"entity-id"},
-			entityId: "entity-id",
+			entity:        &entity{entityId},
+			entityId:      "new-entity-id",
 			expectedError: errors.New("Entity id is immutable!"),
 		},
 	}
@@ -58,7 +98,11 @@ func TestSetId(t *testing.T) {
 			err := testCase.entity.SetId(testCase.entityId)
 
 			if !reflect.DeepEqual(testCase.expectedError, err) {
-				t.Errorf("Expected error %+v, got %+v", testCase.expectedError, err)
+				t.Errorf(
+					"Expected error %+v, got %+v",
+					testCase.expectedError,
+					err,
+				)
 			}
 		})
 	}

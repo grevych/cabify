@@ -1,44 +1,52 @@
 package entities
 
 import (
-  "errors"
-  "fmt"
+	"errors"
+	"fmt"
 )
 
 type Basket struct {
-  *entity
-  Products map[string]*Product
+	*entity
+	Products []*Product
 }
 
-func NewBasket(id string, products map[string]*Product) (*Basket, error) {
+var _ Entity = &Basket{}
+
+func NewBasket(id string, products []*Product) (*Basket, error) {
+	if products == nil {
+		products = []*Product{}
+	}
+
 	return &Basket{
-		entity: &entity{id},
+		entity:   &entity{id},
 		Products: products,
 	}, nil
 }
 
-func(b *Basket) AddProduct(product *Product) error {
+func (b *Basket) AddProduct(product *Product) error {
 	if product == nil {
 		return errors.New("Product cannot be nil")
-	}	
-
-	if product.id == "" {
-		return errors.New("Product requires an id")
 	}
 
-	if _, ok := b.Products[product.id]; ok {
-		return fmt.Errorf("Product %s already exists in basket %s", product.id, b.id)
-	}
+	b.Products = append(b.Products, product)
 
-	b.Products[product.id] = product
 	return nil
 }
 
-func(b *Basket) RemoveProduct(productId string) error {
-	if _, ok := b.Products[productId]; !ok {
+func (b *Basket) RemoveProduct(productId string) error {
+	products := []*Product{}
+
+	for _, product := range b.Products {
+		if product.id != productId {
+			products = append(products, product)
+		}
+	}
+
+	if len(products) == len(b.Products) {
 		return fmt.Errorf("Product %s does not exist in basket %s", productId, b.id)
 	}
 
-	delete(b.Products, productId)
+	b.Products = products
+
 	return nil
 }

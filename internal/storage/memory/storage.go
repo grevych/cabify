@@ -1,21 +1,31 @@
 package memory
 
+import "errors"
+
 type Storage struct {
-	basketStore  *BasketStore
-	productStore *ProductStore
+	BasketStore  *BasketStore
+	ProductStore *ProductStore
 }
 
-func NewStorage(bs *BasketStore, ps *ProductStore) *Storage {
-	return &Storage{
-		basketStore:  bs,
-		productStore: ps,
+func NewStorage(bs *BasketStore, ps *ProductStore) (*Storage, error) {
+	if bs == nil {
+		return nil, errors.New("Basket store cannot be nil")
 	}
+
+	if ps == nil {
+		return nil, errors.New("Product store cannot be nil")
+	}
+
+	return &Storage{
+		BasketStore:  bs,
+		ProductStore: ps,
+	}, nil
 }
 
 func (s *Storage) GetBasketStore() *BasketStore {
-	return s.basketStore
+	return s.BasketStore
 }
 
 func (s *Storage) GetProductStore() *ProductStore {
-	return s.productStore
+	return s.ProductStore
 }

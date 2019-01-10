@@ -1,11 +1,9 @@
 package entities
 
-import (
-  "errors"
-)
+import "errors"
 
 type entity struct {
-  id string
+	id string
 }
 
 type Entity interface {
@@ -15,15 +13,19 @@ type Entity interface {
 
 var _ Entity = &entity{}
 
-func(e *entity) GetId() string {
-  return e.id
+func NewEntity(id string) Entity {
+	return &entity{id}
 }
 
-func(e *entity) SetId(id string) error {
-  if e.id == "" {
-	e.id = id
-	return nil
-  }
+func (e *entity) GetId() string {
+	return e.id
+}
 
-  return errors.New("Entity id is immutable!")
+func (e *entity) SetId(id string) error {
+	if e.id == "" {
+		e.id = id
+		return nil
+	}
+
+	return errors.New("Entity id is immutable!")
 }

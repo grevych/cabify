@@ -21,6 +21,8 @@ type job struct {
 }
 
 type jobResponse struct {
+	err    error
+	basket *entities.Basket
 }
 
 func StartJobQueue(jobQueue chan job) {
@@ -49,12 +51,14 @@ func DetailBasket(checkout *mktplc.Checkout, jobQueue chan job) http.HandlerFunc
 	// Channel
 	return func(w http.ResponseWriter, r *http.Request) {
 		basket := checkout.Detail()
+		responseQueue := make(chan *jobResponse, 1)
 	}
 }
 
 func DeleteBasket(checkout *mktplc.Checkout, jobQueue chan job) http.HandlerFunc {
 	// Channel
 	return func(w http.ResponseWriter, r *http.Request) {
+		responseQueue := make(chan *jobResponse, 1)
 		checkout.Delete()
 	}
 }
@@ -62,6 +66,7 @@ func DeleteBasket(checkout *mktplc.Checkout, jobQueue chan job) http.HandlerFunc
 func AddProduct(checkout *mktplc.Checkout, jobQueue chan job) http.HandlerFunc {
 	// Channel
 	return func(w http.ResponseWriter, r *http.Request) {
+		responseQueue := make(chan *jobResponse, 1)
 		checkout.AddProduct()
 		r.Send()
 	}
@@ -70,6 +75,7 @@ func AddProduct(checkout *mktplc.Checkout, jobQueue chan job) http.HandlerFunc {
 func RemoveProduct(checkout *mktplc.Checkout, jobQueue chan job) http.HandlerFunc {
 	// Channel
 	return func(w http.ResponseWriter, r *http.Request) {
+		responseQueue := make(chan *jobResponse, 1)
 		checkout.RemoveProduct()
 		r.Send()
 	}
