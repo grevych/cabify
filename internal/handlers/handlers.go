@@ -78,7 +78,9 @@ func StartJobQueue(jobQueue chan Job, checkout *mktplc.Checkout) {
 func ListProducts(marketplace *mktplc.Marketplace) http.HandlerFunc {
 	// Doesn't need channel
 	return func(w http.ResponseWriter, r *http.Request) {
-		products, err := marketplace.ListProducts()
+		w.Header().Set("Content-Type", "application/json")
+
+		products, _ := marketplace.ListProducts()
 
 		response, err := json.Marshal(products)
 		if err != nil {
@@ -86,38 +88,15 @@ func ListProducts(marketplace *mktplc.Marketplace) http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
 		w.Write(response)
 	}
-}
-
-func jobHandler(
-	job *Job,
-	jobQueue chan Job,
-	jobResponseQueue chan JobResponse,
-	w http.ResponseWriter,
-) {
-	jobQueue <- *job
-	jobResponse := <-jobResponseQueue
-
-	if jobResponse.err != nil {
-		http.Error(w, jobResponse.err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	response, err := json.Marshal(jobResponse.basket)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(response)
 }
 
 func CreateBasket(jobQueue chan Job) http.HandlerFunc {
 	// Channel
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
 		jobResponseQueue := make(chan JobResponse, 1)
 
 		job := &Job{
@@ -125,13 +104,25 @@ func CreateBasket(jobQueue chan Job) http.HandlerFunc {
 			responseQueue: jobResponseQueue,
 		}
 
-		jobHandler(job, jobQueue, jobResponseQueue, w)
+		jobQueue <- *job
+		jobResponse := <-jobResponseQueue
+
+		statusCode := manageErrorCode(jobResponse.err, 201)
+		response, err := createResponse(jobResponse.basket, jobResponse.err)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(statusCode)
+		w.Write(response)
 	}
 }
 
 func DetailBasket(jobQueue chan Job) http.HandlerFunc {
 	// Channel
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
 		jobResponseQueue := make(chan JobResponse, 1)
 		vars := mux.Vars(r)
 
@@ -141,13 +132,25 @@ func DetailBasket(jobQueue chan Job) http.HandlerFunc {
 			basketId:      vars["checkoutId"],
 		}
 
-		jobHandler(job, jobQueue, jobResponseQueue, w)
+		jobQueue <- *job
+		jobResponse := <-jobResponseQueue
+
+		statusCode := manageErrorCode(jobResponse.err, 200)
+		response, err := createResponse(jobResponse.basket, jobResponse.err)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(statusCode)
+		w.Write(response)
 	}
 }
 
 func DeleteBasket(jobQueue chan Job) http.HandlerFunc {
 	// Channel
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
 		jobResponseQueue := make(chan JobResponse, 1)
 		vars := mux.Vars(r)
 
@@ -157,13 +160,25 @@ func DeleteBasket(jobQueue chan Job) http.HandlerFunc {
 			basketId:      vars["checkoutId"],
 		}
 
-		jobHandler(job, jobQueue, jobResponseQueue, w)
+		jobQueue <- *job
+		jobResponse := <-jobResponseQueue
+
+		statusCode := manageErrorCode(jobResponse.err, 200)
+		response, err := createResponse(jobResponse.basket, jobResponse.err)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(statusCode)
+		w.Write(response)
 	}
 }
 
 func AddProduct(jobQueue chan Job) http.HandlerFunc {
 	// Channel
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
 		jobResponseQueue := make(chan JobResponse, 1)
 		vars := mux.Vars(r)
 
@@ -178,13 +193,25 @@ func AddProduct(jobQueue chan Job) http.HandlerFunc {
 			productId:     product.Id,
 		}
 
-		jobHandler(job, jobQueue, jobResponseQueue, w)
+		jobQueue <- *job
+		jobResponse := <-jobResponseQueue
+
+		statusCode := manageErrorCode(jobResponse.err, 200)
+		response, err := createResponse(jobResponse.basket, jobResponse.err)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(statusCode)
+		w.Write(response)
 	}
 }
 
 func RemoveProduct(jobQueue chan Job) http.HandlerFunc {
 	// Channel
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
 		jobResponseQueue := make(chan JobResponse, 1)
 		vars := mux.Vars(r)
 
@@ -195,6 +222,54 @@ func RemoveProduct(jobQueue chan Job) http.HandlerFunc {
 			productId:     vars["productId"],
 		}
 
-		jobHandler(job, jobQueue, jobResponseQueue, w)
+		jobQueue <- *job
+		jobResponse := <-jobResponseQueue
+
+		statusCode := manageErrorCode(jobResponse.err, 200)
+		response, err := createResponse(jobResponse.basket, jobResponse.err)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(statusCode)
+		w.Write(response)
 	}
+}
+
+func createResponse(basket *entities.Basket, err error) ([]byte, error) {
+	if err != nil {
+		errorResponse := struct {
+			Message string
+		}{
+			Message: err.Error(),
+		}
+
+		return json.Marshal(&errorResponse)
+	}
+
+	return json.Marshal(basket)
+}
+
+func manageErrorCode(err error, expectedCode int) int {
+	if err == nil {
+		return expectedCode
+	}
+
+	if _, ok := err.(*mktplc.NotFoundError); ok {
+		return http.StatusNotFound
+	}
+
+	if _, ok := err.(*mktplc.NotCreatedError); ok {
+		return http.StatusConflict
+	}
+
+	if _, ok := err.(*mktplc.NotUpdatedError); ok {
+		return http.StatusConflict
+	}
+
+	if _, ok := err.(*mktplc.NotDeletedError); ok {
+		return http.StatusConflict
+	}
+
+	return http.StatusInternalServerError
 }

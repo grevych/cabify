@@ -26,7 +26,7 @@ func (c *Checkout) Create() (*entities.Basket, error) {
 	if err != nil {
 		message := "Error in checkout.Create while saving basket"
 		log.Printf("%s: %+v", message, err)
-		return nil, errors.New(message)
+		return nil, NewNotCreatedError(message)
 	}
 
 	return basket, nil
@@ -39,10 +39,11 @@ func (c *Checkout) Detail(basketId string) (*entities.Basket, error) {
 	if err != nil {
 		message := "Error in checkout.Detail while finding basket"
 		log.Printf("%s: %+v", message, err)
-		return nil, errors.New(message)
+		return nil, NewNotFoundError(message)
 	}
 
 	// CLONE BASKET BEFORE APPLYING PROMOTIONS
+	basket = cloneBasket(basket)
 
 	for _, promotion := range c.promotions {
 		promotion(basket)
@@ -61,7 +62,7 @@ func (c *Checkout) Delete(basketId string) error {
 	if err := basketStore.Delete(basketId); err != nil {
 		message := "Error in checkout.Delete while deleting basket"
 		log.Printf("%s: %+v", message, err)
-		return errors.New(message)
+		return NewNotDeletedError(message)
 	}
 
 	return nil
@@ -75,17 +76,18 @@ func (c *Checkout) AddProduct(basketId, productId string) error {
 	if err != nil {
 		message := "Error in checkout.AddProduct while finding basket"
 		log.Printf("%s: %+v", message, err)
-		return errors.New(message)
+		return NewNotFoundError(message)
 	}
 
 	product, err := productStore.FindById(productId)
 	if err != nil {
 		message := "Error in checkout.AddProduct while finding product"
 		log.Printf("%s: %+v", message, err)
-		return errors.New(message)
+		return NewNotFoundError(message)
 	}
 
 	// CLONE PRODUCT BEFORE ADDING IT TO THE BASKET!
+	product = cloneProduct(product)
 
 	if err := basket.AddProduct(product); err != nil {
 		message := "Error in checkout.AddProduct while adding product"
@@ -96,7 +98,7 @@ func (c *Checkout) AddProduct(basketId, productId string) error {
 	if err := basketStore.Update(basket); err != nil {
 		message := "Error in checkout.AddProduct while updating basket"
 		log.Printf("%s: %+v", message, err)
-		return errors.New(message)
+		return NewNotUpdatedError(message)
 	}
 
 	return nil
@@ -109,20 +111,44 @@ func (c *Checkout) RemoveProduct(basketId, productId string) error {
 	if err != nil {
 		message := "Error in checkout.RemoveProduct while finding basket"
 		log.Printf("%s: %+v", message, err)
-		return errors.New(message)
+		return NewNotFoundError(message)
 	}
 
 	if err := basket.RemoveProduct(productId); err != nil {
 		message := "Error in checkout.RemoveProduct while finding product"
 		log.Printf("%s: %+v", message, err)
-		return errors.New(message)
+		return NewNotFoundError(message)
 	}
 
 	if err := basketStore.Update(basket); err != nil {
 		message := "Error in checkout.RemoveProduct while updating basket"
 		log.Printf("%s: %+v", message, err)
-		return errors.New(message)
+		return NewNotUpdatedError(message)
 	}
 
 	return nil
+}
+
+func cloneBasket(oldBasket *entities.Basket) *entities.Basket {
+	newProducts := []*entities.Product{}
+
+	for _, oldProduct := range oldBasket.Products {
+		newProduct := cloneProduct(oldProduct)
+		newProducts = append(newProducts, newProduct)
+	}
+
+	newBasket, _ := entities.NewBasket(oldBasket.Id, newProducts)
+
+	return newBasket
+}
+
+func cloneProduct(oldProduct *entities.Product) *entities.Product {
+	newProduct, _ := entities.NewProduct(
+		oldProduct.Id,
+		oldProduct.Code,
+		oldProduct.Name,
+		oldProduct.Price,
+	)
+
+	return newProduct
 }

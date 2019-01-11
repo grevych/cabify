@@ -8,7 +8,6 @@ func BulkPurchase(productId string, newPrice int64) Promotion {
 			productTargetOne   *entities.Product
 			productTargetTwo   *entities.Product
 			productTargetThree *entities.Product
-			oldPrice           int64
 		)
 
 		for _, product := range basket.Products {
@@ -18,7 +17,6 @@ func BulkPurchase(productId string, newPrice int64) Promotion {
 
 			if productTargetOne == nil {
 				productTargetOne = product
-				oldPrice = product.Price
 				continue
 			}
 
@@ -34,14 +32,9 @@ func BulkPurchase(productId string, newPrice int64) Promotion {
 			product.Price = newPrice
 		}
 
-		if productTargetThree == nil {
-			if productTargetOne != nil {
-				productTargetOne.Price = oldPrice
-			}
-
-			if productTargetTwo != nil {
-				productTargetTwo.Price = oldPrice
-			}
+		if productTargetThree != nil {
+			productTargetOne.Price = newPrice
+			productTargetTwo.Price = newPrice
 		}
 	}
 }
