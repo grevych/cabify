@@ -42,7 +42,6 @@ func (c *Checkout) Detail(basketId string) (*entities.Basket, error) {
 		return nil, NewNotFoundError(message)
 	}
 
-	// CLONE BASKET BEFORE APPLYING PROMOTIONS
 	basket = cloneBasket(basket)
 
 	for _, promotion := range c.promotions {
@@ -86,7 +85,6 @@ func (c *Checkout) AddProduct(basketId, productId string) error {
 		return NewNotFoundError(message)
 	}
 
-	// CLONE PRODUCT BEFORE ADDING IT TO THE BASKET!
 	product = cloneProduct(product)
 
 	if err := basket.AddProduct(product); err != nil {
