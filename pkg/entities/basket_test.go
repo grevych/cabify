@@ -148,6 +148,13 @@ func TestRemoveProductProduct(t *testing.T) {
 				"Product product-id does not exist in basket basket-id",
 			),
 		},
+
+		"TestRemoveOnlyOneProduct": {
+			basket:         createBasket(basketId, product, product),
+			productId:      product.GetId(),
+			expectedBasket: createBasket(basketId, product),
+			expectedError:  nil,
+		},
 	}
 
 	for testName, testCase := range tests {

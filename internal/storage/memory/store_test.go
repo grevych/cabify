@@ -78,6 +78,40 @@ func TestNewStore(t *testing.T) {
 	}
 }
 
+func TestAll(t *testing.T) {
+	entityA := entities.NewEntity("entity-A-id")
+	entityB := entities.NewEntity("entity-B-id")
+
+	tests := map[string]struct {
+		store            *store
+		expectedEntities []entities.Entity
+	}{
+		"TestAll": {
+			store:            createStore(entityA, entityB),
+			expectedEntities: []entities.Entity{entityA, entityB},
+		},
+
+		"TestAllWithEmptyStore": {
+			store:            createStore(),
+			expectedEntities: []entities.Entity{},
+		},
+	}
+
+	for testName, testCase := range tests {
+		t.Run(testName, func(t *testing.T) {
+			entities := testCase.store.All()
+
+			if !reflect.DeepEqual(testCase.expectedEntities, entities) {
+				t.Errorf(
+					"Expected entities %+v, got %+v",
+					testCase.expectedEntities,
+					entities,
+				)
+			}
+		})
+	}
+}
+
 func TestFindById(t *testing.T) {
 	entityId := "entity-id"
 

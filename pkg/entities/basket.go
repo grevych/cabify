@@ -8,6 +8,7 @@ import (
 type Basket struct {
 	*entity
 	Products []*Product
+	Total    int64
 }
 
 var _ Entity = &Basket{}

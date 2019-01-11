@@ -34,6 +34,40 @@ func TestNewProductStore(t *testing.T) {
 	}
 }
 
+func TestAllProducts(t *testing.T) {
+	productA, _ := entities.NewProduct("product-A-id", "PRODUCT", "product", 50)
+	productB, _ := entities.NewProduct("product-B-id", "PRODUCT", "product", 60)
+
+	tests := map[string]struct {
+		productStore     *ProductStore
+		expectedProducts []*entities.Product
+	}{
+		"TestAll": {
+			productStore:     createProductStore(productA, productB),
+			expectedProducts: []*entities.Product{productA, productB},
+		},
+
+		"TestAllWithEmptyProductStore": {
+			productStore:     createProductStore(),
+			expectedProducts: []*entities.Product{},
+		},
+	}
+
+	for testName, testCase := range tests {
+		t.Run(testName, func(t *testing.T) {
+			products := testCase.productStore.All()
+
+			if !reflect.DeepEqual(testCase.expectedProducts, products) {
+				t.Errorf(
+					"Expected products %+v, got %+v",
+					testCase.expectedProducts,
+					products,
+				)
+			}
+		})
+	}
+}
+
 func TestFindByProductId(t *testing.T) {
 	var productPrice int64 = 5000
 
