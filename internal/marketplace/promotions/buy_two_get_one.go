@@ -16,7 +16,14 @@ func PayTwoGetOneFree(productId string) Promotion {
 
 		extras := count / 2
 		for ; extras > 0; extras-- {
-			basket.AddProduct(productTarget)
+			newProduct, _ := entities.NewProduct(
+				productTarget.Id,
+				productTarget.Code,
+				productTarget.Name,
+				productTarget.Price,
+			)
+			newProduct.Price = 0
+			basket.AddProduct(newProduct)
 		}
 	}
 }
