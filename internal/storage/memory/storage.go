@@ -1,31 +1,10 @@
 package memory
 
-import "errors"
+import "github.com/grevych/cabify/internal/storage"
 
-type Storage struct {
-	BasketStore  *BasketStore
-	ProductStore *ProductStore
-}
-
-func NewStorage(bs *BasketStore, ps *ProductStore) (*Storage, error) {
-	if bs == nil {
-		return nil, errors.New("Basket store cannot be nil")
-	}
-
-	if ps == nil {
-		return nil, errors.New("Product store cannot be nil")
-	}
-
-	return &Storage{
-		BasketStore:  bs,
-		ProductStore: ps,
+func NewStorage() (*storage.Storage, error) {
+	return &storage.Storage{
+		Baskets:  NewBasketStore(),
+		Products: NewProductStore(),
 	}, nil
-}
-
-func (s *Storage) GetBasketStore() *BasketStore {
-	return s.BasketStore
-}
-
-func (s *Storage) GetProductStore() *ProductStore {
-	return s.ProductStore
 }

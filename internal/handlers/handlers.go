@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	mktplc "github.com/grevych/cabify/internal/marketplace"
+	"github.com/grevych/cabify/internal/marketplace"
 	"github.com/grevych/cabify/pkg/entities"
 )
 
@@ -23,7 +23,7 @@ type JobResponse struct {
 	basket *entities.Basket
 }
 
-func StartJobQueue(jobQueue chan Job, checkout *mktplc.Checkout) {
+func StartJobQueue(jobQueue chan Job, checkout *marketplace.Checkout) {
 	for job := range jobQueue {
 		response := JobResponse{}
 
@@ -75,12 +75,12 @@ func StartJobQueue(jobQueue chan Job, checkout *mktplc.Checkout) {
 	}
 }
 
-func ListProducts(marketplace *mktplc.Marketplace) http.HandlerFunc {
+func ListProducts(mktplc *marketplace.Marketplace) http.HandlerFunc {
 	// Doesn't need channel
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		products, _ := marketplace.ListProducts()
+		products, _ := mktplc.ListProducts()
 
 		response, err := json.Marshal(products)
 		if err != nil {
@@ -255,19 +255,19 @@ func manageErrorCode(err error, expectedCode int) int {
 		return expectedCode
 	}
 
-	if _, ok := err.(*mktplc.NotFoundError); ok {
+	if _, ok := err.(*marketplace.NotFoundError); ok {
 		return http.StatusNotFound
 	}
 
-	if _, ok := err.(*mktplc.NotCreatedError); ok {
+	if _, ok := err.(*marketplace.NotCreatedError); ok {
 		return http.StatusConflict
 	}
 
-	if _, ok := err.(*mktplc.NotUpdatedError); ok {
+	if _, ok := err.(*marketplace.NotUpdatedError); ok {
 		return http.StatusConflict
 	}
 
-	if _, ok := err.(*mktplc.NotDeletedError); ok {
+	if _, ok := err.(*marketplace.NotDeletedError); ok {
 		return http.StatusConflict
 	}
 

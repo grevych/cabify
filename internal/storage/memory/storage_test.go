@@ -1,53 +1,34 @@
 package memory
 
 import (
-	"errors"
 	"reflect"
 	"testing"
+
+	"github.com/grevych/cabify/internal/storage"
 )
 
-func createStorage(bs *BasketStore, ps *ProductStore) *Storage {
-	storage, _ := NewStorage(bs, ps)
+func createStorage() *storage.Storage {
+	storage, _ := NewStorage()
 	return storage
 }
 
 func TestNewStorage(t *testing.T) {
 	tests := map[string]struct {
-		basketStore     *BasketStore
-		productStore    *ProductStore
-		expectedStorage *Storage
+		expectedStorage *storage.Storage
 		expectedError   error
 	}{
 		"TestNewStorage": {
-			basketStore:  NewBasketStore(),
-			productStore: NewProductStore(),
-			expectedStorage: &Storage{
-				BasketStore:  NewBasketStore(),
-				ProductStore: NewProductStore(),
+			expectedStorage: &storage.Storage{
+				Baskets:  NewBasketStore(),
+				Products: NewProductStore(),
 			},
 			expectedError: nil,
-		},
-
-		"TestNewStorageWithNilBasketStore": {
-			basketStore:     nil,
-			productStore:    NewProductStore(),
-			expectedStorage: nil,
-			expectedError:   errors.New("Basket store cannot be nil"),
-		},
-
-		"TestNewStorageWithNilProductStore": {
-			basketStore:     NewBasketStore(),
-			productStore:    nil,
-			expectedStorage: nil,
-			expectedError:   errors.New("Product store cannot be nil"),
 		},
 	}
 
 	for testName, testCase := range tests {
 		t.Run(testName, func(t *testing.T) {
-			storage, err := NewStorage(
-				testCase.basketStore, testCase.productStore,
-			)
+			storage, err := NewStorage()
 
 			if !reflect.DeepEqual(testCase.expectedError, err) {
 				t.Errorf(
@@ -62,64 +43,6 @@ func TestNewStorage(t *testing.T) {
 					"Expected storage %+v, got %+v",
 					testCase.expectedStorage,
 					storage,
-				)
-			}
-		})
-	}
-}
-
-func TestGetBasketStore(t *testing.T) {
-	basketStore := NewBasketStore()
-	productStore := NewProductStore()
-
-	tests := map[string]struct {
-		storage             *Storage
-		expectedBasketStore *BasketStore
-	}{
-		"TestGetBasketStore": {
-			storage:             createStorage(basketStore, productStore),
-			expectedBasketStore: basketStore,
-		},
-	}
-
-	for testName, testCase := range tests {
-		t.Run(testName, func(t *testing.T) {
-			basketStore := testCase.storage.GetBasketStore()
-
-			if !reflect.DeepEqual(testCase.expectedBasketStore, basketStore) {
-				t.Errorf(
-					"Expected basket store %+v, got %+v",
-					testCase.expectedBasketStore,
-					basketStore,
-				)
-			}
-		})
-	}
-}
-
-func TestGetProductStore(t *testing.T) {
-	basketStore := NewBasketStore()
-	productStore := NewProductStore()
-
-	tests := map[string]struct {
-		storage              *Storage
-		expectedProductStore *ProductStore
-	}{
-		"TestGetProductStore": {
-			storage:              createStorage(basketStore, productStore),
-			expectedProductStore: productStore,
-		},
-	}
-
-	for testName, testCase := range tests {
-		t.Run(testName, func(t *testing.T) {
-			productStore := testCase.storage.GetProductStore()
-
-			if !reflect.DeepEqual(testCase.expectedProductStore, productStore) {
-				t.Errorf(
-					"Expected product store %+v, got %+v",
-					testCase.expectedProductStore,
-					productStore,
 				)
 			}
 		})

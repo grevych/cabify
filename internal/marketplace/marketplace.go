@@ -1,20 +1,20 @@
 package marketplace
 
 import (
-	"github.com/grevych/cabify/internal/storage/memory"
+	"github.com/grevych/cabify/internal/storage"
 	"github.com/grevych/cabify/pkg/entities"
 )
 
 type Marketplace struct {
-	storage *memory.Storage
+	database *storage.Storage
 }
 
-func NewMarketplace(storage *memory.Storage) *Marketplace {
-	return &Marketplace{storage}
+func NewMarketplace(database *storage.Storage) *Marketplace {
+	return &Marketplace{database}
 }
 
 func (m *Marketplace) ListProducts() ([]*entities.Product, error) {
-	productStore := m.storage.GetProductStore()
+	productStore := m.database.Products
 
 	return productStore.All(), nil
 }
