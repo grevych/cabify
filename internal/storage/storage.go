@@ -10,17 +10,18 @@ type entityStore interface {
 	Delete(string) error
 }
 
-type basketStore interface {
+type BasketStore interface {
 	entityStore
 	FindById(string) (*entities.Basket, error)
 }
 
-type productStore interface {
+type ProductStore interface {
 	entityStore
 	FindById(string) (*entities.Product, error)
+	All() []*entities.Product
 }
 
-type Storage interface {
-	GetBasketStore() basketStore
-	GetProductStore() productStore
+type Storage struct {
+	Baskets  BasketStore
+	Products ProductStore
 }

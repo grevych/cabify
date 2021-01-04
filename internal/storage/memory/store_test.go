@@ -194,17 +194,17 @@ func TestSave(t *testing.T) {
 				)
 			}
 
-			if testCase.expectingEntity && storedEntityId == nil {
+			if testCase.expectingEntity && storedEntityId == "" {
 				t.Errorf("Expected entity id, got nil")
 			}
 
 			if testCase.expectingEntity {
-				if _, ok := testCase.store.items[*storedEntityId]; !ok {
+				if _, ok := testCase.store.items[storedEntityId]; !ok {
 					t.Errorf("Expected entity in store, got entity not in store")
 				}
 			}
 
-			if !testCase.expectingEntity && storedEntityId != nil {
+			if !testCase.expectingEntity && storedEntityId != "" {
 				t.Errorf("Expected nil, got entity id")
 			}
 		})

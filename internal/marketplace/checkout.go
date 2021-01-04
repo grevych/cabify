@@ -4,23 +4,23 @@ import (
 	"errors"
 	"log"
 
-	promos "github.com/grevych/cabify/internal/marketplace/promotions"
-	"github.com/grevych/cabify/internal/storage/memory"
+	"github.com/grevych/cabify/internal/marketplace/promotions"
+	"github.com/grevych/cabify/internal/storage"
 	"github.com/grevych/cabify/pkg/entities"
 )
 
 type Checkout struct {
-	storage    *memory.Storage
-	promotions []promos.Promotion
+	database   *storage.Storage
+	promotions []promotions.Promotion
 }
 
-func NewCheckout(storage *memory.Storage, promotions []promos.Promotion) *Checkout {
-	return &Checkout{storage, promotions}
+func NewCheckout(database *storage.Storage, initialPromotions []promotions.Promotion) *Checkout {
+	return &Checkout{database, initialPromotions}
 }
 
 func (c *Checkout) Create() (*entities.Basket, error) {
 	basket, _ := entities.NewBasket("", nil)
-	basketStore := c.storage.GetBasketStore()
+	basketStore := c.database.Baskets
 
 	_, err := basketStore.Save(basket)
 	if err != nil {
@@ -33,7 +33,7 @@ func (c *Checkout) Create() (*entities.Basket, error) {
 }
 
 func (c *Checkout) Detail(basketId string) (*entities.Basket, error) {
-	basketStore := c.storage.GetBasketStore()
+	basketStore := c.database.Baskets
 
 	basket, err := basketStore.FindById(basketId)
 	if err != nil {
@@ -56,7 +56,7 @@ func (c *Checkout) Detail(basketId string) (*entities.Basket, error) {
 }
 
 func (c *Checkout) Delete(basketId string) error {
-	basketStore := c.storage.GetBasketStore()
+	basketStore := c.database.Baskets
 
 	if err := basketStore.Delete(basketId); err != nil {
 		message := "Error in checkout.Delete while deleting basket"
@@ -68,8 +68,8 @@ func (c *Checkout) Delete(basketId string) error {
 }
 
 func (c *Checkout) AddProduct(basketId, productId string) error {
-	basketStore := c.storage.GetBasketStore()
-	productStore := c.storage.GetProductStore()
+	basketStore := c.database.Baskets
+	productStore := c.database.Products
 
 	basket, err := basketStore.FindById(basketId)
 	if err != nil {
@@ -103,7 +103,7 @@ func (c *Checkout) AddProduct(basketId, productId string) error {
 }
 
 func (c *Checkout) RemoveProduct(basketId, productId string) error {
-	basketStore := c.storage.GetBasketStore()
+	basketStore := c.database.Baskets
 
 	basket, err := basketStore.FindById(basketId)
 	if err != nil {
