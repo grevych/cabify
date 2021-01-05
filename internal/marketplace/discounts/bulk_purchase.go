@@ -1,8 +1,8 @@
-package promotions
+package discounts
 
 import "github.com/grevych/cabify/pkg/entities"
 
-func BulkPurchase(productId string, newPrice int64) Promotion {
+func BulkPurchase(productId string, newPrice int64) Discount {
 	return func(basket *entities.Basket) {
 		var (
 			productTargetOne   *entities.Product

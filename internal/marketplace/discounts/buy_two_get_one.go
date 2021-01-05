@@ -1,8 +1,8 @@
-package promotions
+package discounts
 
 import "github.com/grevych/cabify/pkg/entities"
 
-func PayTwoGetOneFree(productId string) Promotion {
+func PayTwoGetOneFree(productId string) Discount {
 	return func(basket *entities.Basket) {
 		var productTarget *entities.Product
 

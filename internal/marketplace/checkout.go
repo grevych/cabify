@@ -4,18 +4,18 @@ import (
 	"errors"
 	"log"
 
-	"github.com/grevych/cabify/internal/marketplace/promotions"
+	"github.com/grevych/cabify/internal/marketplace/discounts"
 	"github.com/grevych/cabify/internal/storage"
 	"github.com/grevych/cabify/pkg/entities"
 )
 
 type Checkout struct {
-	database   *storage.Storage
-	promotions []promotions.Promotion
+	database  *storage.Storage
+	discounts []discounts.Discount
 }
 
-func NewCheckout(database *storage.Storage, initialPromotions []promotions.Promotion) *Checkout {
-	return &Checkout{database, initialPromotions}
+func NewCheckout(database *storage.Storage, initialDiscounts []discounts.Discount) *Checkout {
+	return &Checkout{database, initialDiscounts}
 }
 
 func (c *Checkout) Create() (*entities.Basket, error) {
@@ -44,8 +44,8 @@ func (c *Checkout) Detail(basketId string) (*entities.Basket, error) {
 
 	basket = cloneBasket(basket)
 
-	for _, promotion := range c.promotions {
-		promotion(basket)
+	for _, discount := range c.discounts {
+		discount(basket)
 	}
 
 	for _, product := range basket.Products {
