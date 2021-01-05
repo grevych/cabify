@@ -9,7 +9,7 @@ import (
 	"github.com/grevych/cabify/internal"
 	"github.com/grevych/cabify/internal/handlers"
 	"github.com/grevych/cabify/internal/marketplace"
-	"github.com/grevych/cabify/internal/marketplace/promotions"
+	"github.com/grevych/cabify/internal/marketplace/discounts"
 	"github.com/grevych/cabify/internal/storage"
 	"github.com/grevych/cabify/pkg/entities"
 )
@@ -32,10 +32,10 @@ func initStock(database *storage.Storage) (voucher, mug, shirt *entities.Product
 	return
 }
 
-func initPromotions(voucher, mug, shirt *entities.Product) []promotions.Promotion {
-	return []promotions.Promotion{
-		promotions.PayTwoGetOneFree(voucher.GetId()),
-		promotions.BulkPurchase(shirt.GetId(), 1900),
+func initDiscounts(voucher, mug, shirt *entities.Product) []discounts.Discount {
+	return []discounts.Discount{
+		discounts.PayTwoGetOneFree(voucher.GetId()),
+		discounts.BulkPurchase(shirt.GetId(), 1900),
 	}
 }
 
@@ -43,10 +43,10 @@ func main() {
 	database, _ := internal.CreateStorage("memory")
 
 	voucher, mug, shirt := initStock(database)
-	initialPromotions := initPromotions(voucher, mug, shirt)
+	initialdiscounts := initDiscounts(voucher, mug, shirt)
 
 	mktplc := marketplace.NewMarketplace(database)
-	checkout := marketplace.NewCheckout(database, initialPromotions)
+	checkout := marketplace.NewCheckout(database, initialdiscounts)
 
 	// Job Queue
 	jobQueue := make(chan handlers.Job)
